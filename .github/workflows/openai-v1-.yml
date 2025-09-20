@@ -1,0 +1,18 @@
+name: jaytech-external-oas-openai-v1
+
+on:
+  push:
+    paths:
+      - 'openai/openai-api-v1.yaml'
+
+jobs:
+  contract-workflow:
+    uses: JayTechHQ/jaytech-workflows/.github/workflows/oas-release-contract.yml@master
+    with:
+      namespace: JayTech.External.OAS.OpenAI.V1
+      dotnet-version: "9.x"
+    secrets:
+      azure-api-key: ${{ secrets.AZURE_API_KEY }}
+      azure-feed: jaytech-nuget
+      azure-source: https://pkgs.dev.azure.com/JayTechIT/JayTech/_packaging/jaytech-nuget/nuget/v3/index.json
+      pat-github: ${{ secrets.PAT_GITHUB }}
