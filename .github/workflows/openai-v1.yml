@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'src/openai/openai-api-v1.yaml'
+      - '.github/workflows/jaytech-external-oas-openai-v1.yml'
 
 jobs:
   contract-workflow:
