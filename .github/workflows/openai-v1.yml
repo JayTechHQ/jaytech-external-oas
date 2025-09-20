@@ -11,6 +11,7 @@ jobs:
     with:
       namespace: JayTech.External.OAS.OpenAI.V1
       dotnet-version: "9.x"
+      oas-file-path: src/openai/openai-api-v1.yaml
     secrets:
       azure-api-key: ${{ secrets.AZURE_API_KEY }}
       azure-feed: jaytech-nuget
