@@ -1,0 +1,310 @@
+openapi: 3.0.3
+info:
+  title: openai-api-v1
+  version: "{{OAS_VERSION}}"
+  description: |
+    OpenAI Embeddings API (subset) — a focused OpenAPI 3.0.3 contract for the
+    /v1/embeddings endpoint. Designed to follow the repository Spectral rules
+    and styling conventions (operationId, request/response naming, correlation
+    headers and component ordering).
+security:
+  - BearerAuth: []
+tags:
+  - name: Embedding
+    description: Operations for generating text embeddings from input text.
+paths:
+  /v1/embeddings:
+    post:
+      tags:
+        - Embedding
+      summary: Create embeddings for input text
+      description: |
+        Generate vector embeddings for provided input using the specified model.
+        The request accepts a single input string or an array of input strings.
+        The response returns one embedding vector per input item.
+      operationId: PostEmbedding
+      parameters:
+        - $ref: "#/components/parameters/XCorrelationId"
+      requestBody:
+        $ref: "#/components/requestBodies/PostEmbeddingRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/PostEmbeddingResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "409":
+          $ref: "#/components/responses/ConflictResponse"
+        "500":
+          $ref: "#/components/responses/InternalServerErrorResponse"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailableResponse"
+      security:
+        - BearerAuth: []
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    XCorrelationId:
+      name: x-correlation-id
+      in: header
+      description: |
+        Optional unique request identifier provided by the client for tracing.
+      required: false
+      schema:
+        type: string
+        nullable: false
+  requestBodies:
+    PostEmbeddingRequest:
+      description: Request body for the PostEmbedding operation.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Embedding.Request"
+  responses:
+    BadRequestResponse:
+      description: Bad request — malformed input or validation error
+      headers:
+        x-correlation-id:
+          $ref: "#/components/headers/X-Correlation-Id"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    ConflictResponse:
+      description: Conflict
+      headers:
+        x-correlation-id:
+          $ref: "#/components/headers/X-Correlation-Id"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    ForbiddenResponse:
+      description: Forbidden — permission denied
+      headers:
+        x-correlation-id:
+          $ref: "#/components/headers/X-Correlation-Id"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    InternalServerErrorResponse:
+      description: Internal server error
+      headers:
+        x-correlation-id:
+          $ref: "#/components/headers/X-Correlation-Id"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    NotFoundResponse:
+      description: Not found
+      headers:
+        x-correlation-id:
+          $ref: "#/components/headers/X-Correlation-Id"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    PostEmbeddingResponse:
+      description: Successful embedding response for PostEmbedding
+      headers:
+        x-correlation-id:
+          $ref: "#/components/headers/X-Correlation-Id"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Embedding.Response"
+          example:
+            object: list
+            data:
+              - object: embedding
+                embedding:
+                  - 0.012
+                  - -0.034
+                  - 0.55
+                index: 0
+            model: text-embedding-3-small
+            usage:
+              prompt_tokens: 5
+              total_tokens: 5
+    ServiceUnavailableResponse:
+      description: Service unavailable
+      headers:
+        x-correlation-id:
+          $ref: "#/components/headers/X-Correlation-Id"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    UnauthorizedResponse:
+      description: Unauthorized — authentication failed
+      headers:
+        x-correlation-id:
+          $ref: "#/components/headers/X-Correlation-Id"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+  headers:
+    X-Correlation-Id:
+      description: Correlation id echoed on responses for tracing
+      schema:
+        type: string
+        nullable: false
+      example: 123e4567-e89b-12d3-a456-426614174000
+  schemas:
+    Embedding.Data:
+      description: Array of embedding items (one per input)
+      type: array
+      nullable: false
+      uniqueItems: false
+      items:
+        $ref: "#/components/schemas/Embedding.Item"
+    Embedding.Item:
+      description: A single embedding item in the embeddings response data array
+      type: object
+      nullable: false
+      additionalProperties: false
+      required:
+        - object
+        - embedding
+        - index
+      properties:
+        object:
+          type: string
+          description: Type of the returned object (embedding)
+          nullable: false
+        embedding:
+          $ref: "#/components/schemas/Embedding.Vector"
+        index:
+          type: integer
+          format: int32
+          description: The index of the input this embedding corresponds to
+          nullable: false
+    Embedding.Request:
+      description: Request object for creating embeddings
+      type: object
+      nullable: false
+      additionalProperties: false
+      required:
+        - model
+        - input
+      properties:
+        model:
+          type: string
+          description: Model to use for embeddings (e.g. text-embedding-3-small)
+          nullable: false
+        input:
+          description: |
+            Input text to get embeddings for. May be a single string or an
+            array of strings. When an array is provided, the response contains
+            one embedding entry per input item.
+
+            In the initial version only 1-on-1 is supported.
+          $ref: "#/components/schemas/Embedding.String"
+        user:
+          type: string
+          description: A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse. Learn more.
+          nullable: true
+        dimensions:
+          type: integer
+          format: int32
+          description: The number of dimensions the resulting output embeddings should have. Only supported in text-embedding-3 and later models.
+          nullable: true
+    Embedding.Response:
+      description: Response object for embeddings
+      type: object
+      nullable: false
+      additionalProperties: false
+      required:
+        - object
+        - data
+        - model
+      properties:
+        object:
+          type: string
+          description: Top-level object type (usually "list")
+          nullable: false
+        data:
+          $ref: "#/components/schemas/Embedding.Data"
+        model:
+          type: string
+          description: The model used to generate the embeddings
+          nullable: false
+        usage:
+          $ref: "#/components/schemas/Embedding.Usage"
+    Embedding.String:
+      description: Single string input
+      type: string
+      nullable: false
+    Embedding.Usage:
+      description: Usage metrics for the request
+      type: object
+      nullable: false
+      additionalProperties: false
+      required:
+        - prompt_tokens
+        - total_tokens
+      properties:
+        prompt_tokens:
+          type: integer
+          format: int32
+          nullable: false
+        total_tokens:
+          type: integer
+          format: int32
+          nullable: false
+    Embedding.Vector:
+      description: A numeric vector (array of floats) used by embedding items
+      type: array
+      uniqueItems: false
+      items:
+        type: number
+        format: float
+        nullable: false
+      nullable: false
+      example:
+        - 0.012
+        - -0.034
+        - 0.55
+    Error.Details:
+      description: Details of an error response
+      type: object
+      nullable: false
+      additionalProperties: false
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          nullable: false
+        type:
+          type: string
+          nullable: true
+        param:
+          type: string
+          nullable: true
+        code:
+          type: string
+          nullable: true
+    ErrorResponse:
+      description: Standard error response
+      type: object
+      nullable: false
+      additionalProperties: false
+      required:
+        - error
+      properties:
+        error:
+          $ref: "#/components/schemas/Error.Details"
