@@ -3,7 +3,7 @@ name: jaytech-external-oas-openai-v1
 on:
   push:
     paths:
-      - 'openai/openai-api-v1.yaml'
+      - 'src/openai/openai-api-v1.yaml'
 
 jobs:
   contract-workflow:
