@@ -12,6 +12,8 @@ security:
 tags:
   - name: Embedding
     description: Operations for generating text embeddings from input text.
+servers:
+  - url: https://api.openai.com
 paths:
   /v1/embeddings:
     post:
