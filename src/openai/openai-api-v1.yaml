@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: openai-api-v1
-  version: "{{OAS_VERSION}}"
+  version: "1.0.0"
   description: |
     OpenAI Embeddings API (subset) — a focused OpenAPI 3.0.3 contract for the
     /v1/embeddings endpoint. Designed to follow the repository Spectral rules
@@ -24,6 +24,7 @@ paths:
         The response returns one embedding vector per input item.
       operationId: PostEmbedding
       parameters:
+        - $ref: "#/components/parameters/Authorization"
         - $ref: "#/components/parameters/XCorrelationId"
       requestBody:
         $ref: "#/components/requestBodies/PostEmbeddingRequest"
@@ -53,6 +54,14 @@ components:
       scheme: bearer
       bearerFormat: JWT
   parameters:
+    Authorization:
+      name: Authorization
+      in: header
+      description: Bearer token for authentication (e.g., Bearer <token>)
+      required: true
+      schema:
+        type: string
+        nullable: false
     XCorrelationId:
       name: x-correlation-id
       in: header
