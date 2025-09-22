@@ -7,6 +7,8 @@ info:
     /v1/embeddings endpoint. Designed to follow the repository Spectral rules
     and styling conventions (operationId, request/response naming, correlation
     headers and component ordering).
+servers:
+  - url: https://api.openai.com
 security:
   - BearerAuth: []
 tags:
@@ -308,5 +310,4 @@ components:
       properties:
         error:
           $ref: "#/components/schemas/Error.Details"
-servers:
-  - url: https://api.openai.com
+
